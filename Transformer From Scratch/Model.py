@@ -205,5 +205,23 @@ class MultiHead_Attention_Block(nn.Module):
             # Shape (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Dim_Model)
             return self.W_o(Output)
 
+# Residual Connection -> Connection that allows to Skip/Redirect the Output towards multiple Layers
+
+class Residual_Connection(nn.Module):
+    def __init__(self, Dropout:float) -> None:
+        """
+        := param: Dropout
+        """
+        super().__init__()
+        self.Dropout = nn.Dropout(Dropout)
+        self.norm = Layer_Normalization()
+
+    def forward(self, x:torch.Tensor, SubLayer):
+        """
+        := param: x
+        := param: SubLayer - Previous Layer
+        """
+        return x + self.Dropout(SubLayer(self.norm(x)))
+
 if __name__ == "__main__":
     print("HELLO THERE")
