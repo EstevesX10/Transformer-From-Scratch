@@ -110,5 +110,64 @@ class FeedForward_Block(nn.Module):
         # In the end, we convert it back using linear_2, obtaining the original shape (Batch, Sequence_Length, Dim_Model)
         self.linear_2(self.Dropout(torch.relu(self.linear_1(x))))
 
+# Multi-Head Attention Block
+# -> ...
+
+class MultiHead_Attention_Block(nn.Module):
+    def __init__(self, Dim_Model:int, Num_Heads:int, Dropout:float) -> None:
+        """
+        := param: Dim_Model - Dimensionality of the Input ad Output Layers
+        := param: Num_Heads - Number of Heads
+        := param: Dropout
+
+        Note: To Divide the embedding vector into <Num_Heads> Heads, the Dim_Model should be divisible by the Num_Heads
+        """
+
+        super().__init__()
+        self.Dim_Model = Dim_Model
+        self.Num_Heads = Num_Heads
+        self.Dropout = nn.Dropout(Dropout)
+
+        # Making sure that the Dim_Model is divisible by the Num_Heads
+        assert Dim_Model % Num_Heads == 0, "Dim_Model is not divisible by Num_Heads"
+
+        # Dk -> Dim_Model // Num_Heads (According to the Source Material)
+        self.D_k = Dim_Model // Num_Heads
+
+        # -> Next Step: Getting the Matrices by which we are going to multiply the query, the key and the values as well as the Output Matrix (W_O)
+        
+        # Query Matrix [Shape (Dim_Model, Dim_Model)]
+        self.W_q = nn.Linear(Dim_Model, Dim_Model)
+
+        # Key Matrix [Shape (Dim_Model, Dim_Model)]
+        self.W_k = nn.Linear(Dim_Model, Dim_Model)
+
+        # Values Matrix [Shape (Dim_Model, Dim_Model)]
+        self.W_v = nn.Linear(Dim_Model, Dim_Model)
+
+        # Output Matrix [Shape (Dim_Model, Dim_Model)]
+        self.W_o = nn.Linear(Dim_Model, Dim_Model)
+
+        # Defining the Dropout
+        self.Dropout = Dropout(Dropout)
+
+        def forward(self, Query, Key, Values, Mask):
+            """
+            := param: Query
+            := param: Key
+            := param: Values
+            := param: Mask - Used in order to prevent some words to interact with other words
+            
+            """
+            # Q' Calculation
+            query = self.W_q(Query) # From shape (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Dim_Model)
+
+            key = self.W_k(Key) # From shape (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Dim_Model)
+            
+            values = self.W_v(Values) # From shape (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Dim_Model)
+
+            # Split the Embedding [(Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Num,_Heads, D_k) -- <By Transposition> -> (Batch_Size, Num_Heads, Sequence_Length, D_k)]
+            query = query.view(query.shape[0], query.shape[1], self.Num_Heads, self.D_k).transpose(1, 2)
+
 if __name__ == "__main__":
-    print(" HELLO THERE")
+    print("HELLO THERE")
