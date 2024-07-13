@@ -77,6 +77,10 @@ class Layer_Normalization(nn.Module):
         self.bias = nn.Parameter(torch.zeros(1)) # Used in Addition
 
     def forward(self, x:torch.Tensor):
+        """
+        := param: x
+        """
+
         # Calculate the Mean
         mean = x.mean(dim = -1, keepdim=True)
 
@@ -105,6 +109,10 @@ class FeedForward_Block(nn.Module):
         self.linear_2 = nn.Linear(Dim_FeedForward, Dim_Model)
 
     def forward(self, x:torch.Tensor):
+        """
+        := param: x
+        """
+
         # Input Sentence - Tensor with shape (Batch, Sequence_Length, Dim_Model)
         # Convert it using linear_1 into another tensor of shape (Batch, Sequence_Length, Dim_FeedForward)
         # In the end, we convert it back using linear_2, obtaining the original shape (Batch, Sequence_Length, Dim_Model)
@@ -122,7 +130,6 @@ class MultiHead_Attention_Block(nn.Module):
 
         Note: To Divide the embedding vector into <Num_Heads> Heads, the Dim_Model should be divisible by the Num_Heads
         """
-
         super().__init__()
         self.Dim_Model = Dim_Model
         self.Num_Heads = Num_Heads
@@ -219,9 +226,69 @@ class Residual_Connection(nn.Module):
     def forward(self, x:torch.Tensor, SubLayer):
         """
         := param: x
-        := param: SubLayer - Previous Layer
+        := param: SubLayer -> Previous Layer
         """
         return x + self.Dropout(SubLayer(self.norm(x)))
+
+# Encoder Block
+# -> Contains two Main Blocks: MultiHead Attention Block and the FeedForward Block
+# -> It also includes 2 steps of Addition and Normalization between the Outputs of each block and the Outputs from External Residual Connections
+
+class Encoder_Block(nn.Module):
+    def __init__(self, Self_Attention_Block:MultiHead_Attention_Block, Feed_Forward_Block:FeedForward_Block, Dropout:float) -> None:
+        """
+        := param: Self_Attention_Block
+        := param: Feed_Forwaard_Block
+        := param: Dropout
+        """
+        super().__init__()
+
+        # Save the given Blocks
+        self.Self_Attention_Block = Self_Attention_Block
+        self.Feed_Forward_Block = Feed_Forward_Block
+        
+        # Define the 2 Residual Connections
+        self.Residual_Connections = nn.ModuleList([Residual_Connection(Dropout) for _ in range(2)])
+
+        def forward(self, x:torch.Tensor, Source_Mask):
+            """
+            := param: x
+            := param: Source_Mask - Mask that we want to apply to the input of the Encoder (To prevent the interaction between the padding word with other words)
+            """
+
+            # Making the First Residual Connection (takes into account the query, key, values and Mask)
+            x = self.Residual_Connections[0](x, lambda x : self.Self_Attention_Block(x, x, x, Source_Mask))
+
+            # Making the Second Residual Connection (Skips the MultiHead Attention Block and is redirected to the FeedFoward Block)
+            x = self.Residual_Connections[1](x, self.Feed_Forward_Block)
+
+            # Return the Final Value
+            return x
+
+# Encoder
+# -> The Encoder contains N Encoder Blocks. Therefore it takes into account each one when forwarding the input message throughut the entire system
+
+class Encoder(nn.Module):
+    def __init__(self, Layers:nn.ModuleList) -> None:
+        """
+        := param: Layers - Layers of the Encoder (Has up to N Layers)
+        """
+        super().__init__()
+        self.Layers = Layers
+        self.Norm = Layer_Normalization()
+
+    def forward(self, x:torch.Tensor, Mask):
+        """
+        := param: x
+        := param: Mask
+        """
+        
+        # Iterate through the Layer
+        for Layer in self.Layers:
+            x = Layer(x, Mask)
+
+        # Apply Layer Normalization and Return the Output
+        return self.Norm(x)
 
 if __name__ == "__main__":
     print("HELLO THERE")
