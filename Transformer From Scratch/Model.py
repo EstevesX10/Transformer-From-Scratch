@@ -90,7 +90,7 @@ class Layer_Normalization(nn.Module):
         # Apply the Normalization
         return self.alpha * (x - mean) / (std + self.eps) + self.bias
 
-class FeedForward_Block(nn.Module):
+class Feed_Forward_Block(nn.Module):
     def __init__(self, Dim_Model:int, Dim_FeedForward:int, Dropout:float) -> None:
         """
         := param:  Dim_Model - Dimensionality of the Input ad Output Layers
@@ -235,7 +235,7 @@ class Residual_Connection(nn.Module):
 # -> It also includes 2 steps of Addition and Normalization between the Outputs of each block and the Outputs from External Residual Connections
 
 class Encoder_Block(nn.Module):
-    def __init__(self, Self_Attention_Block:MultiHead_Attention_Block, Feed_Forward_Block:FeedForward_Block, Dropout:float) -> None:
+    def __init__(self, Self_Attention_Block:MultiHead_Attention_Block, Feed_Forward_Block:Feed_Forward_Block, Dropout:float) -> None:
         """
         := param: Self_Attention_Block
         := param: Feed_Forwaard_Block
@@ -290,5 +290,79 @@ class Encoder(nn.Module):
         # Apply Layer Normalization and Return the Output
         return self.Norm(x)
 
+
+# Decoder Block
+# -> Contains 3 Main Blocks:
+#     - Masked Multi-Head Attention Block [Receives the Output Embedding which in pratical terms is equal to the Input Embedding]
+#     - Multi-Head Attention Block [Takes into account the Key and Values that were outputed by the Decoder]
+#     - Feed Forward Block
+# -> It also contains 3 additional steps of addition and Normalization
+
+class Decoder_Block(nn.Module):
+    def __init__(self, Self_Attention_Block:MultiHead_Attention_Block, Cross_Attention_Block:MultiHead_Attention_Block, Feed_Forward_Block:Feed_Forward_Block, Dropout:float) -> None:
+        """
+        := param: Self_Attention_Block
+        := param: Cross_Attention_Block - Allows to merge the output of the Encoder (Key and Values) with the Query that comes from the previous layers of the decoder block
+        := param: Feed_Forward_Block
+        := param: Dropout
+        """
+        super().__init__()
+
+        # Saving the Blocks
+        self.Attention_Block = Self_Attention_Block
+        self.Cross_Attention_Block = Cross_Attention_Block
+        self.Feed_Forward_Block = Feed_Forward_Block
+
+        # Defining the Residual Connections (In this Case we have 3 of them)
+        self.Residual_Connections = nn.Module([Residual_Connection(Dropout) for _ in range(3)])
+
+    def forward(self, x:torch.Tensor, Encoder_Output, Source_Mask, Target_Mask):
+        """
+        := param: x - Input of the Decoder
+        := param: Encoder_Output - Output of the Encoder
+        := param: Source_Mask - Mask applied to the Encoder
+        := param: Target_Mask - Mask applied to the Decoder
+        """
+
+        # Calculate the Self Attention [First Part of the Decoder Block]
+        x = self.Residual_Connections[0](x, lambda x : self.Attention_Block(x, x, x, Target_Mask))
+
+        # Calculate the Cross Attention
+        x = self.Residual_Connections[1](x, lambda x : self.Cross_Attention_Block(x, Encoder_Output, Encoder_Output, Source_Mask))
+        
+        # Finally, we add the Feed Forward Block
+        x = self.Residual_Connections[2](x, self.Feed_Forward_Block)
+
+        # Return the Output / Final Value of the Decoder Block
+        return x
+    
+# Decoder
+# -> The Decoder contains N Decoder Blocks. Therefore it takes into account each one when forwarding the input message throughut the entire system
+
+class Decoder(nn.Module):
+    def __init__(self, Layers:nn.ModuleList) -> None:
+        """
+        := param: Layers - Layers of the Decoder (Has up to N Layers)
+        """
+        super().__init__()
+        self.Layers = Layers
+        self.Norm = Layer_Normalization()
+
+    def forward(self, x, Encoder_Output, Source_Mask, Target_Mask):
+        """
+        := param: x - Input of the Decoder
+        := param: Encoder_Output - Output of the Encoder
+        := param: Source_Mask - Mask applied to the Encoder
+        := param: Target_Mask - Mask applied to the Decoder
+        """
+
+        # Iterate through each Layer
+        for Layer in self.Layers:
+            x = Layer(x, Encoder_Output, Source_Mask, Target_Mask)
+        
+        # Apply Layer Normalization and Return the Output
+        return self.Norm(x)
+        
 if __name__ == "__main__":
+    # Translation Task [English to Italian]
     print("HELLO THERE")
