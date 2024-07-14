@@ -448,7 +448,66 @@ class Transformer(nn.Module):
         # Simply apply the Projection (Goes from the Embedding to the Vocabulary Size)
         return self.Projection_Layer(x)
 
+# Build_Transformer Function 
+# -> Merges all the previous Blocks, allowing to create a custom Transformer with given hyperparameters
+
+def Build_Transformer(Source_Vocabulary_Size:int, Target_Vocabulary_Size:int, Source_Sequence_Length:int, Target_Sequence_Length:int, Dim_Model:int=512, N:int=6, Num_Heads:int=8, Dropout:float=0.1, D_ff:int = 2048) -> Transformer:
+    """
+    := param: Source_Vocabulary_Size
+    := param: Target_Vocabulary_Size
+    := param: Source_Sequence_Length
+    := param: Target_Sequence_Length
+    := param: Dim_Model
+    := param: N - Number of Layers (Number of Encoder and Decoder Blocks)
+    := param: Num_Heads - Number of Heads
+    := param: Dropout
+    := param: D_ff
+    """
+    
+    # Create the Embedding Layers
+    Source_Embedding = Input_Embeddings(Dim_Model, Source_Vocabulary_Size)
+    Target_Embedding = Input_Embeddings(Dim_Model, Target_Vocabulary_Size)
+
+    # Create the Positional Encoding Layers
+    Source_Position = Positional_Encoding(Dim_Model, Source_Sequence_Length, Dropout)
+    Target_Position = Positional_Encoding(Dim_Model, Target_Sequence_Length, Dropout)
+
+    # Create the Encoder Blocks
+    Encoder_Blocks = []
+    for _ in range(N):
+        Encoder_Self_Attention_Block = MultiHead_Attention_Block(Dim_Model, Num_Heads, Dropout)
+        Feed_Forward_Block_ = Feed_Forward_Block(Dim_Model, D_ff, Dropout)
+        Encoder_Block_ = Encoder_Block(Encoder_Self_Attention_Block, Feed_Forward_Block_, Dropout)
+        Encoder_Blocks.append(Encoder_Block_)
+
+    # Create the Decoder Blocks
+    Decoder_Blocks = []
+    for _ in range(N):
+        Decoder_Self_Attention_Block = MultiHead_Attention_Block(Dim_Model, Num_Heads, Dropout)
+        Decoder_Cross_Attention_Block = MultiHead_Attention_Block(Dim_Model, Num_Heads, Dropout)
+        Feed_Forward_Block_ = Feed_Forward_Block(Dim_Model, D_ff, Dropout)
+        Decoder_Block_ = Decoder_Block(Decoder_Self_Attention_Block, Decoder_Cross_Attention_Block, Feed_Forward_Block_, Dropout)
+        Decoder_Blocks.append(Decoder_Block_)
+
+    # Create the Encoder and Decoder
+    Encoder_ = Encoder(nn.ModuleList(Encoder_Blocks))
+    Decoder_ = Decoder(nn.ModuleList(Decoder_Blocks))
+
+    # Create the Projection Layer
+    Projection_Layer_ = Projection_Layer(Dim_Model, Target_Vocabulary_Size)
+
+    # Build the Transformer
+    Transformer_ = Transformer(Encoder_, Decoder_, Source_Embedding, Target_Embedding, Source_Position, Target_Position, Projection_Layer_)
+
+    # Initialize the Parameters
+    for p in Transformer_.parameters():
+        if p.dim() > 1 :
+            nn.init.xavier_uniform_(p)
+
+    # Return the Transformer
+    return Transformer_
 
 if __name__ == "__main__":
-    # Translation Task [English to Italian]
+    # This Project focuses mainly on using a Tranformer in a Translation Task [English to Italian]
+    # However, the Transformer can be used outside this spectrum
     print("HELLO THERE")
