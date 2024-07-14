@@ -362,7 +362,29 @@ class Decoder(nn.Module):
         
         # Apply Layer Normalization and Return the Output
         return self.Norm(x)
-        
+
+# Projection Layer [Called Linear Layer in the Diagram of the Paper]
+# -> Projects / Converts the Embedding [Ouput of the Decoder] into the Vocabulary 
+
+class Projection_Layer(nn.Module):
+    # Simply a Linear Layer that converts the Output from Size of Dim_Model to the Vocabulary_Size
+    def __init__(self, Dim_Model:int, Vocabulary_Size:int) -> None:
+        """
+        := param: Dim_Model 
+        := param: Vocabulary_Size
+        """
+        super().__init__()
+        self._Projection_Layer = nn.Linear(Dim_Model, Vocabulary_Size)
+
+    def forward(self, x):
+        """
+        := param: x
+        """
+
+        # Shape Conversion: (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Vocabulary_Size)
+        # We also apply the log of softmax to maintain numerical stability and return the Value
+        return torch.log_softmax(self._Projection_Layer(x), dim = -1)
+
 if __name__ == "__main__":
     # Translation Task [English to Italian]
     print("HELLO THERE")
