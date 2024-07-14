@@ -16,9 +16,8 @@ class Input_Embeddings(nn.Module):
         self.Embedding = nn.Embedding(Vocabulary_Size, Dim_Model)
     
     def forward(self, x:torch.Tensor):
-        # DO the mapping based on the Embedding layer provided by pytorch
+        # Do the mapping based on the Embedding layer provided by pytorch
         return self.Embedding(x) * math.sqrt(self.Dim_Model)
-    
 
 # Positional Encoding (Conveys the Position of each word in the sentence)
 
@@ -290,7 +289,6 @@ class Encoder(nn.Module):
         # Apply Layer Normalization and Return the Output
         return self.Norm(x)
 
-
 # Decoder Block
 # -> Contains 3 Main Blocks:
 #     - Masked Multi-Head Attention Block [Receives the Output Embedding which in pratical terms is equal to the Input Embedding]
@@ -384,6 +382,72 @@ class Projection_Layer(nn.Module):
         # Shape Conversion: (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Vocabulary_Size)
         # We also apply the log of softmax to maintain numerical stability and return the Value
         return torch.log_softmax(self._Projection_Layer(x), dim = -1)
+
+# Transformer
+# -> Processes the Input throughout the components of the system
+
+class Transformer(nn.Module):
+    def __init__(self, Encoder:Encoder, Decoder:Decoder, Source_Embedding:Input_Embeddings, Target_Embedding:Input_Embeddings, Source_Position:Positional_Encoding, Target_Position:Positional_Encoding, Projection_Layer:Projection_Layer) -> None:
+        """
+        := param: Encoder
+        := param: Decoder
+        := param: Source_Embedding - Input Embedding for the Source Language 
+        := param: Target_Embedding - Input Embedding for the Target Language
+        := param: Source_Position
+        := param: Target_Position
+        := param: Projection_Layer
+        """
+        super().__init__()
+        
+        # Saving the Components of the Transformer
+        self.Encoder = Encoder
+        self.Decoder = Decoder
+        self.Source_Embedding = Source_Embedding
+        self.Target_Embedding = Target_Embedding
+        self.Source_Position = Source_Position
+        self.Target_Position = Target_Position
+        self.Projection_Layer = Projection_Layer
+
+    def encode(self, Source, Source_Mask):
+        """
+        := param: Source
+        := param: Source_Mask
+        """
+        
+        # Apply the Embedding
+        Source = self.Source_Embedding(Source)
+
+        # Apply the Positional Encoding
+        Source = self.Source_Position(Source)
+
+        # Apply the Encoder
+        return self.Encoder(Source, Source_Mask)
+
+    def decode(self, Encoder_Output:torch.Tensor, Source_Mask:torch.Tensor, Target, Target_Mask):
+        """
+        := param: Encoder_Output
+        := param: Source_Mask
+        := param: Target
+        := param: Target_Mask
+        """
+
+        # Apply the Target Embedding to the Target Sentence
+        Target = self.Target_Embedding(Target)
+
+        # Apply the Positional Encoding to the Target Sentence
+        Target = self.Target_Position(Target)
+
+        # Apply the Decoder
+        return self.Decoder(Target, Encoder_Output, Source_Mask, Target_Mask)
+
+    def project(self, x:torch.Tensor):
+        """
+        := param: x
+        """
+
+        # Simply apply the Projection (Goes from the Embedding to the Vocabulary Size)
+        return self.Projection_Layer(x)
+
 
 if __name__ == "__main__":
     # Translation Task [English to Italian]
