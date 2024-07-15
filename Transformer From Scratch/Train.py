@@ -11,6 +11,8 @@
 
 import torch
 from torch import (nn)
+from torch.utils.data import (Dataset, DataLoader, random_split)
+
 from datasets import (load_dataset)
 from tokenizers import (Tokenizer)
 from tokenizers.models import (WordLevel)
@@ -23,7 +25,8 @@ def Get_All_Sentences(dataset, language):
     := param: dataset - Dataset used to Train the Transformer
     := param: language - Language to which we are going to build the Tokenizer
     """
-    pass
+    for item in dataset:
+        yield item['translation'][language]
 
 def Get_or_Build_Tokenizer(config, dataset, language):
     """
@@ -50,3 +53,19 @@ def Get_or_Build_Tokenizer(config, dataset, language):
 
     # Return the Tokenizer
     return tokenizer
+
+def Get_Dataset(config):
+    """
+    := param: config - Configuration of the Model
+    """
+    # Extrating dynamically the Dataset from HuggingFace
+    raw_dataset = load_dataset('opus_books', f'{config["lang_src"]}-{config["lang_tgt"]}', split='train')
+
+    # Build the tokenizers
+    tokenizer_source = Get_or_Build_Tokenizer(config, raw_dataset, config['lang_src'])
+    tokenizer_target = Get_or_Build_Tokenizer(config, raw_dataset, config['lang_tgt'])
+
+    # Split the Data (90% for Trainning and 10% for Testing / Validation)
+    train_dataset_size = int(0.9 * len(raw_dataset))
+    test_dataset_size = len(raw_dataset) - train_dataset_size
+    raw_train_dataset, raw_test_dataset = random_split(raw_dataset, [train_dataset_size, test_dataset_size])
