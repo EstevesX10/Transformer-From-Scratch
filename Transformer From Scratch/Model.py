@@ -312,7 +312,7 @@ class DecoderBlock(nn.Module):
         self.Feed_Forward_Block = Feed_Forward_Block
 
         # Defining the Residual Connections (In this Case we have 3 of them)
-        self.Residual_Connections = nn.Module([ResidualConnection(Dropout) for _ in range(3)])
+        self.Residual_Connections = nn.ModuleList([ResidualConnection(Dropout) for _ in range(3)])
 
     def forward(self, x:torch.Tensor, Encoder_Output, Source_Mask, Target_Mask):
         """
