@@ -1,3 +1,5 @@
+from pathlib import (Path)
+
 def Get_Configuration():
     return {
         "batch_size" : 8,
@@ -8,8 +10,25 @@ def Get_Configuration():
         "source_language" : "en",
         "target_language" : "pt",
         "model_folder" : "Weights",
-        "model_filename" : "tmodel_",
+        "model_basename" : "tmodel_",
         "preload" : None,
         "tokenizer_file" : "tokenizer_{0}.json",
         "experiment_name" : "runs/tmodel"
     }
+
+def Get_Weights_File_Path(config:dict, epoch:str):
+    """
+    := param: config
+    := param: epoch
+    """
+    
+    # Getting the Model Folder
+    model_folder = config['model_folder']
+
+    # Getting the name of the Model
+    model_basename = config['model_basename']
+
+    # Defining the Model's filename
+    model_filename = f"{model_basename}{epoch}.pt"
+
+    return str(Path('.') / model_folder / model_filename)
