@@ -13,6 +13,8 @@ import torch
 from torch import (nn)
 from torch.utils.data import (Dataset, DataLoader, random_split)
 
+from Dataset import (BilingualDataset, causal_mask)
+
 from datasets import (load_dataset)
 from tokenizers import (Tokenizer)
 from tokenizers.models import (WordLevel)
@@ -69,3 +71,31 @@ def Get_Dataset(config):
     train_dataset_size = int(0.9 * len(raw_dataset))
     test_dataset_size = len(raw_dataset) - train_dataset_size
     raw_train_dataset, raw_test_dataset = random_split(raw_dataset, [train_dataset_size, test_dataset_size])
+
+    # Creating the respective datasets from the splitted data
+    train_dataset = BilingualDataset(raw_train_dataset, tokenizer_source, tokenizer_target, config['lang_src'], config['lang_tgt'], config['seq_len'])
+    test_dataset = BilingualDataset(raw_test_dataset, tokenizer_source, tokenizer_target, config['lang_src'], config['lang_tgt'], config['seq_len'])
+
+    # In order to choose the Max Sequence Length we need to find the Maximum length of the sentence in the source and target
+    max_length_source = 0
+    max_length_target = 0
+
+    for item in raw_dataset:
+        source_ids = tokenizer_source.encode(item['translation'][config['lang_src']]).ids
+        target_ids = tokenizer_source.encode(item['translation'][config['lang_tgt']]).ids
+        max_length_source = max(max_length_source, len(source_ids))
+        max_length_target = max(max_length_target, len(target_ids))
+    
+    print(f"Max Length of Source Sentence: {max_length_source}")
+    print(f"Max Length of Target Sentence: {max_length_target}")
+
+    # Create the Data Loaders
+    train_dataloader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=True)
+
+    # Return the DataLoaders of the Trainning and Testing / Validation as well as the source and target tokenizers
+    return train_dataloader, test_dataloader, tokenizer_source, tokenizer_target
+
+# Build the Model
+def Get_Model():
+    ...
