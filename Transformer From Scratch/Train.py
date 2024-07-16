@@ -12,9 +12,10 @@
 import torch
 from torch import (nn)
 from torch.utils.data import (Dataset, DataLoader, random_split)
+from torch.utils.tensorboard import SummaryWriter
 
 from Dataset import (BilingualDataset, causal_mask)
-
+from Configuration import (Get_Weights_File_Path, Get_Configuration)
 from Model import (Transformer, Build_Transformer)
 
 from datasets import (load_dataset)
@@ -111,3 +112,50 @@ def Get_Model(config, source_vocabulary_size, target_vocabulary_size):
 
     # Return the new Model
     return model
+
+# Train the Model (given the configuration)
+def Train_Model(config):
+    """
+    := param: config
+    """
+    
+    # Define the device on which we are going to place all the tensors
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device: {device}")
+
+    # Making sure the weights folder is created
+    Path(config['model_folder']).mkdir(parents=True, exist_ok=True)
+
+    # Load the Dataset
+    train_dataloader, test_dataloader, tokenizer_source, tokenizer_target = Get_Dataset(config)
+
+    # Create the Model and transfer it to the device
+    model = Get_Model(config, tokenizer_source.get_vocab_size(), tokenizer_target.get_vocab_size()).to(device)
+
+    # Start TensorBoard -> Allows to visualize the loss through graphics and charts
+    writer = SummaryWriter(config['experiment_name'])
+
+    # Create the Optimizer (Used the Adam Optimizer)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'], eps=1e-9)
+
+    # Create a way to manage the Model in order to restore the state of the Model and its optimizer in the future
+    initial_epoch = 0
+    global_step = 0
+    if config['preload']:
+        # Get the filename 
+        model_filename = Get_Weights_File_Path(config, config['preload'])
+        print(f'Preloading Model {model_filename}')
+
+        # Load the File and update the initial epoch and global step
+        state = torch.load(model_filename)
+        initial_epoch = state['epoch'] + 1
+        global_step = state['global_step']
+
+        # Load the state of the optimizer
+        optimizer.load_state_dict(state['optimizer_state_dict'])
+    
+    # Define the loss funtion
+    loss_funtion = nn.CrossEntropyLoss(ignore_index=tokenizer_source.token_to_id('[PAD]'), label_smoothing=0.1).to(device) # label smoothing allows to transfer a small percentage of the occurence with the highest probability and redistribute it through the other occurences / "ouputs"
+
+    # Create the Trainning Loop
+    ...
