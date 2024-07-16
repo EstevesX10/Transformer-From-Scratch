@@ -12,7 +12,7 @@
 import torch
 from torch import (nn)
 from torch.utils.data import (Dataset, DataLoader, random_split)
-from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard import (SummaryWriter)
 
 from Dataset import (BilingualDataset, causal_mask)
 from Configuration import (Get_Weights_File_Path, Get_Configuration)
@@ -26,6 +26,8 @@ from tokenizers.pre_tokenizers import (Whitespace)
 from pathlib import (Path)
 
 from tqdm import (tqdm)
+
+import warnings
 
 def Get_All_Sentences(dataset, language):
     """
@@ -217,3 +219,8 @@ def Train_Model(config):
             'optimizer_state_dict': optimizer.state_dict(),
             'global_step': global_step
         }, model_filename)
+
+if __name__ == "__main__":
+    warnings.filterwarnings('ignore')
+    config = Get_Configuration()
+    Train_Model(config)
