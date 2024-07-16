@@ -54,7 +54,7 @@ class BilingualDataset(Dataset):
         decoder_num_padidng_tokens = self.sequence_length - len(decoder_input_tokens) - 1 # We use -1 since we only add the SOS token to the decoder side. Consequently, we only add the EOS token in the target / label (Final Output)
 
         if encoder_num_padidng_tokens < 0 or decoder_num_padidng_tokens < 0:
-            raise ValueError('Sentence is too Long!')
+            raise ValueError('The sentence is too long!')
         
         # Let's build both Tensors for the Encoder Input and the Decoder Input
         # Added the Start of Sentence and End of Sentence Tokens to the Source Text
@@ -66,3 +66,48 @@ class BilingualDataset(Dataset):
                 torch.tensor([self.padding_token] * encoder_num_padidng_tokens, dtype=torch.int64)
             ]
         )
+
+        # Adding the SOS token to the decoder input
+        decoder_input = torch.cat(
+            [
+                self.sos_token,
+                torch.tensor(decoder_input_tokens, dtype=torch.int64),
+                torch.tensor([self.padding_token] * decoder_num_padidng_tokens, dtype=torch.int64)
+            ]
+        )
+
+        # Build the Label [Adding the EOS token to the label (output of the decoder)]
+        label = torch.cat(
+            [
+                torch.tensor(decoder_input_tokens, dtype=torch.int64),
+                self.eos_token,
+                torch.tensor([self.padding_token] * decoder_num_padidng_tokens, dtype=torch.int64)
+            ]
+        )
+
+        # Making sure we have reached the sequence length
+        assert encoder_input.size(0) == self.sequence_length
+        assert decoder_input.size(0) == self.sequence_length
+        assert label.size(0) == self.sequence_length
+
+        # Return a Dictionary with the built tensors
+        return {
+            "encoder_input" : encoder_input, # Number of tokens = Sequence Length
+            "decoder_input" : decoder_input, # Number of tokens = Sequence Length
+            "encoder_mask"  : (encoder_input != self.padding_token).unsqueeze(0).unsqueeze(0).int(), # Shape (1, 1, sequence length)
+            "decoder_mask"  : (decoder_input != self.padding_token).unsqueeze(0).unsqueeze(0).int() & causal_mask(decoder_input.size(0)), # (1, sequence length) & (1, sequence length, sequence length)
+            "label"         : label, # Size (sequence length)
+            "source_text"   : source_text,
+            "target_text"   : target_text
+        }
+
+def causal_mask(size:int):
+    """
+    := param: size
+    """
+    
+    # Create a mask in order to hide the superior diagonal from the matrix that maps the sentence words into numerical values
+    mask = torch.triu(torch.ones(1, size, size), diagonal=1).type(torch.int64)
+
+    # Return all the values bellow the matrix's diagonal
+    return mask == 0
