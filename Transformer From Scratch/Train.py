@@ -25,6 +25,8 @@ from tokenizers.trainers import (WordLevelTrainer)
 from tokenizers.pre_tokenizers import (Whitespace)
 from pathlib import (Path)
 
+from tqdm import (tqdm)
+
 def Get_All_Sentences(dataset, language):
     """
     := param: dataset - Dataset used to Train the Transformer
@@ -158,4 +160,60 @@ def Train_Model(config):
     loss_funtion = nn.CrossEntropyLoss(ignore_index=tokenizer_source.token_to_id('[PAD]'), label_smoothing=0.1).to(device) # label smoothing allows to transfer a small percentage of the occurence with the highest probability and redistribute it through the other occurences / "ouputs"
 
     # Create the Trainning Loop
-    ...
+    for epoch in range(initial_epoch, config['num_epochs']):
+        model.train()
+        batch_iterator = tqdm(train_dataloader, desc=f'Processing epoch {epoch:02d}')
+
+        for batch in batch_iterator:
+            # Get the encoder / decoder inputs
+            encoder_input = batch['encoder_input'].to(device) # Shape (batch size, sequence length)
+            decoder_input = batch['decoder_input'].to(device) # Shape (batch size, sequence length)
+
+            # Get the encoder / decoder masks
+            encoder_mask = batch['encoder_mask'].to(device) # Shape (batch size, 1, 1, sequence length)
+            decoder_mask = batch['decoder_mask'].to(device) # Shape (batch size, 1, sequence length, sequence length)
+
+            # -> Run the tensors through the Transformer
+            
+            # Calculate the output of the encoder
+            encoder_output = model.encode(encoder_input, encoder_mask) # Shape (batch size, sequence length, dim model)
+            
+            # Calculate the output of the decoder
+            decoder_output = model.decode(encoder_output, encoder_mask, decoder_input, decoder_mask) # Shape (batch size, sequence length, dim model)
+
+            # Map it back to the Vocabulary through Projection
+            projection_output = model.project(decoder_output) # Shape (batch size, sequence length, target vocabulary size)
+
+            # -> Now that we have the output of the Model, we want to compare it with the label
+
+            # Extract the Label from the Batch
+            label = batch['label'].to(device) # Shape (batch size, sequence length)
+
+            # Compute the Loss [Shape from (batch size, sequence length, target vocabulary size) --> to (batch size * sequence length, target vocabulary size)]
+            loss = loss_funtion(projection_output.view(-1, tokenizer_target.get_vocab_size()), label.view(-1))
+
+            # Update the Progress Bar with the calculated Loss
+            batch_iterator.set_postfix({f"Loss" : f"{loss.item():6.3f}"})
+
+            # Log the Loss into Tensorboard
+            writer.add_scalar('Train Loss', loss.item(), global_step)
+            writer.flush()
+
+            # Backpropagate the Loss
+            loss.backward()
+
+            # Update the weights of the model
+            optimizer.step()
+            optimizer.zero_grad()
+
+            # Increment the global step [Mostly used to track the Loss in Tensorboard]
+            global_step += 1
+
+        # Save the Model at the end of each epoch
+        model_filename = Get_Weights_File_Path(config, f'{epoch:02d}')
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'global_step': global_step
+        }, model_filename)
