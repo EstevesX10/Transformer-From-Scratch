@@ -337,19 +337,19 @@ def Run_Validation(model:Transformer, validation_dataset, tokenizer_source:Token
         
         # Compute the Character Error Rate
         metric = torchmetrics.CharErrorRate()
-        character_error_rate = metric(predicted_text, target_text)
+        character_error_rate = metric(predicted_texts, expected_texts)
         writer.add_scalar('Validation Character Error Rate', character_error_rate, global_step)
         writer.flush()
 
         # Compute the Word Error Rate
         metric = torchmetrics.WordErrorRate()
-        word_error_rate = metric(predicted_text, target_text)
+        word_error_rate = metric(predicted_texts, expected_texts)
         writer.add_scalar('Validation Word Error Rate', word_error_rate, global_step)
         writer.flush()
 
         # Compute the BLEU Score
         metric = torchmetrics.BLEUScore()
-        bleu_score = metric(predicted_text, target_text)
+        bleu_score = metric(predicted_texts, expected_texts)
         writer.add_scalar('Validation BLEU', bleu_score, global_step)
         writer.flush()
 
