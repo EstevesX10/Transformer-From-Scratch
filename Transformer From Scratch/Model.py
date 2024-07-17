@@ -10,14 +10,14 @@ class InputEmbeddings(nn.Module):
         := param: Dim_Model - Dimension of the Final Vector
         := param: Vocabulary_Size - How many words there are in the Vocabulary
         """
-        super.__init__()
-        self.Dim_Model = Dim_Model
-        self.Vocabulary_Size = Vocabulary_Size
-        self.Embedding = nn.Embedding(Vocabulary_Size, Dim_Model)
+        super().__init__()
+        self.dim_model = Dim_Model
+        self.vocabulary_size = Vocabulary_Size
+        self.embedding = nn.Embedding(Vocabulary_Size, Dim_Model)
     
     def forward(self, x:torch.Tensor):
         # Do the mapping based on the Embedding layer provided by pytorch
-        return self.Embedding(x) * math.sqrt(self.Dim_Model)
+        return self.embedding(x) * math.sqrt(self.dim_model)
 
 # Positional Encoding (Conveys the Position of each word in the sentence)
 
@@ -29,9 +29,9 @@ class PositionalEncoding(nn.Module):
         := param: Dropout - Prevents the model from Overfitting
         """
         super().__init__()
-        self.Dim_Model = Dim_Model
-        self.Sequenece_Length = Sequence_Length
-        self.Dropout = nn.Dropout(Dropout)
+        self.dim_model = Dim_Model
+        self.sequenece_length = Sequence_Length
+        self.dropout = nn.Dropout(Dropout)
 
         # Create a Matrix of Shape (Sequence_Length, Dim_Model)
         Pos_Encoding = torch.zeros(Sequence_Length, Dim_Model)
@@ -51,15 +51,15 @@ class PositionalEncoding(nn.Module):
         # Add Batch Dimension - So that we can apply it to full sentence
         Pos_Encoding = Pos_Encoding.unsqueeze(0) # Tensor of shape (1, Sequence_Length, Dim_Model)
 
-        # To save the Tensor along with the State of the Model (in a File), we need to register it to the Buffer
-        self.register_buffer('pe', Pos_Encoding)
+        # To save the Tensor along with the State of the Model (in a File), we need to register it as a Buffer
+        self.register_buffer('Pos_Encoding', Pos_Encoding)
 
     def forward(self, x:torch.Tensor):
         # Adding Positional Encoding to every word in the sentence
-        x = x + (self.Pos_Encoding[: , :x.shape[1], :]).requires_grad(False)
+        x = x + (self.Pos_Encoding[: , :x.shape[1], :]).requires_grad_(False)
 
         # Apply the Dropout
-        return self.Dropout(x)
+        return self.dropout(x)
 
 # Layer Normalization
 # -> Given a Batch of N items, we calculate the mean and variance of each one and consequently update their values based on their mean and variance
@@ -102,7 +102,7 @@ class FeedForwardBlock(nn.Module):
         self.linear_1 = nn.Linear(Dim_Model, Dim_FeedForward)
         
         # Define the Dropout
-        self.Dropout = nn.Dropout(Dropout)
+        self.dropout = nn.Dropout(Dropout)
 
         # Define the second matrix (W2 and b2)
         self.linear_2 = nn.Linear(Dim_FeedForward, Dim_Model)
@@ -115,7 +115,7 @@ class FeedForwardBlock(nn.Module):
         # Input Sentence - Tensor with shape (Batch, Sequence_Length, Dim_Model)
         # Convert it using linear_1 into another tensor of shape (Batch, Sequence_Length, Dim_FeedForward)
         # In the end, we convert it back using linear_2, obtaining the original shape (Batch, Sequence_Length, Dim_Model)
-        self.linear_2(self.Dropout(torch.relu(self.linear_1(x))))
+        self.linear_2(self.dropout(torch.relu(self.linear_1(x))))
 
 # Multi-Head Attention Block
 # -> Calculates the MultiHead Attention Output given a Query, a Key and Values
@@ -130,9 +130,9 @@ class MultiHeadAttentionBlock(nn.Module):
         Note: To Divide the embedding vector into <Num_Heads> Heads, the Dim_Model should be divisible by the Num_Heads
         """
         super().__init__()
-        self.Dim_Model = Dim_Model
-        self.Num_Heads = Num_Heads
-        self.Dropout = nn.Dropout(Dropout)
+        self.dim_model = Dim_Model
+        self.num_heads = Num_Heads
+        self.dropout = nn.Dropout(Dropout)
 
         # Making sure that the Dim_Model is divisible by the Num_Heads
         assert Dim_Model % Num_Heads == 0, "Dim_Model is not divisible by Num_Heads"
@@ -143,19 +143,16 @@ class MultiHeadAttentionBlock(nn.Module):
         # -> Next Step: Getting the Matrices by which we are going to multiply the query, the key and the values as well as the Output Matrix (W_O)
         
         # Query Matrix [Shape (Dim_Model, Dim_Model)]
-        self.W_q = nn.Linear(Dim_Model, Dim_Model)
+        self.W_q = nn.Linear(Dim_Model, Dim_Model, bias=False)
 
         # Key Matrix [Shape (Dim_Model, Dim_Model)]
-        self.W_k = nn.Linear(Dim_Model, Dim_Model)
+        self.W_k = nn.Linear(Dim_Model, Dim_Model, bias=False)
 
         # Values Matrix [Shape (Dim_Model, Dim_Model)]
-        self.W_v = nn.Linear(Dim_Model, Dim_Model)
+        self.W_v = nn.Linear(Dim_Model, Dim_Model, bias=False)
 
         # Output Matrix [Shape (Dim_Model, Dim_Model)]
-        self.W_o = nn.Linear(Dim_Model, Dim_Model)
-
-        # Defining the Dropout
-        self.Dropout = Dropout(Dropout)
+        self.W_o = nn.Linear(Dim_Model, Dim_Model, bias=False)
 
     @staticmethod
     def attention(Query:torch.Tensor, Key:torch.Tensor, Values:torch.Tensor, Mask, Dropout:nn.Dropout):
@@ -176,7 +173,7 @@ class MultiHeadAttentionBlock(nn.Module):
         if Dropout is not None:
             attention_scores = Dropout(attention_scores)
 
-        # Return the 
+        # Return the attention scores which can be used for visualization
         return (attention_scores @ Values, attention_scores)
 
     def forward(self, Query:torch.Tensor, Key:torch.Tensor, Values:torch.Tensor, Mask):
@@ -197,15 +194,15 @@ class MultiHeadAttentionBlock(nn.Module):
         values = self.W_v(Values) # From shape (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Dim_Model)
 
         # Split the Embedding into small matrices [(Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Num,_Heads, D_k) -- <By Transposition> -> (Batch_Size, Num_Heads, Sequence_Length, D_k)]
-        query = query.view(query.shape[0], query.shape[1], self.Num_Heads, self.D_k).transpose(1, 2)
-        key = key.view(key.shape[0], key.shape[1], self.Num_Heads, self.D_k).transpose(1, 2)
-        values = values.view(values.shape[0], values.shape[1], self.Num_Heads, self.D_k).transpose(1, 2)
+        query = query.view(query.shape[0], query.shape[1], self.num_heads, self.D_k).transpose(1, 2)
+        key = key.view(key.shape[0], key.shape[1], self.num_heads, self.D_k).transpose(1, 2)
+        values = values.view(values.shape[0], values.shape[1], self.num_heads, self.D_k).transpose(1, 2)
 
         # Calculate the Attention 
-        Output, self.attention_scores = MultiHeadAttentionBlock.attention(Query, Key, Values, Mask, self.Dropout)
+        Output, self.attention_scores = MultiHeadAttentionBlock.attention(query, key, values, Mask, self.dropout)
 
         # (Batch_Size, Num_Heads, Sequence_Length, D_k) --> (Batch_Size, Sequence_Length, Num_Heads, D_k) --> (Batch_Size, Sequence_Length, Dim_Model)
-        Output = Output.transpose(1, 2).contiguous().view(Output.shape[0], -1, self.Num_Heads * self.D_k) 
+        Output = Output.transpose(1, 2).contiguous().view(Output.shape[0], -1, self.num_heads * self.D_k) 
 
         # Multiply the Output with W_0 and return its value
         # Shape (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Dim_Model)
@@ -227,6 +224,9 @@ class ResidualConnection(nn.Module):
         := param: x
         := param: SubLayer -> Previous Layer
         """
+        
+        print(SubLayer(self.norm(x)))
+        
         return x + self.Dropout(SubLayer(self.norm(x)))
 
 # Encoder Block
@@ -243,11 +243,11 @@ class EncoderBlock(nn.Module):
         super().__init__()
 
         # Save the given Blocks
-        self.Self_Attention_Block = Self_Attention_Block
-        self.Feed_Forward_Block = Feed_Forward_Block
+        self.self_attention_block = Self_Attention_Block
+        self.feed_forward_block = Feed_Forward_Block
         
         # Define the 2 Residual Connections
-        self.Residual_Connections = nn.ModuleList([ResidualConnection(Dropout) for _ in range(2)])
+        self.residual_connections = nn.ModuleList([ResidualConnection(Dropout) for _ in range(2)])
 
     def forward(self, x:torch.Tensor, Source_Mask):
         """
@@ -256,10 +256,10 @@ class EncoderBlock(nn.Module):
         """
 
         # Making the First Residual Connection (takes into account the query, key, values and Mask)
-        x = self.Residual_Connections[0](x, lambda x : self.Self_Attention_Block(x, x, x, Source_Mask))
+        x = self.residual_connections[0](x, lambda x : self.self_attention_block(x, x, x, Source_Mask))
 
         # Making the Second Residual Connection (Skips the MultiHead Attention Block and is redirected to the FeedFoward Block)
-        x = self.Residual_Connections[1](x, self.Feed_Forward_Block)
+        x = self.residual_connections[1](x, self.feed_forward_block)
 
         # Return the Final Value
         return x
@@ -273,8 +273,8 @@ class Encoder(nn.Module):
         := param: Layers - Layers of the Encoder (Has up to N Layers)
         """
         super().__init__()
-        self.Layers = Layers
-        self.Norm = LayerNormalization()
+        self.layers = Layers
+        self.norm = LayerNormalization()
 
     def forward(self, x:torch.Tensor, Mask):
         """
@@ -283,11 +283,11 @@ class Encoder(nn.Module):
         """
         
         # Iterate through the Layer
-        for Layer in self.Layers:
-            x = Layer(x, Mask)
+        for layer in self.layers:
+            x = layer(x, Mask)
 
         # Apply Layer Normalization and Return the Output
-        return self.Norm(x)
+        return self.norm(x)
 
 # Decoder Block
 # -> Contains 3 Main Blocks:
@@ -307,12 +307,12 @@ class DecoderBlock(nn.Module):
         super().__init__()
 
         # Saving the Blocks
-        self.Attention_Block = Self_Attention_Block
-        self.Cross_Attention_Block = Cross_Attention_Block
-        self.Feed_Forward_Block = Feed_Forward_Block
+        self.attention_block = Self_Attention_Block
+        self.cross_attention_block = Cross_Attention_Block
+        self.feed_forward_block = Feed_Forward_Block
 
         # Defining the Residual Connections (In this Case we have 3 of them)
-        self.Residual_Connections = nn.ModuleList([ResidualConnection(Dropout) for _ in range(3)])
+        self.residual_connections = nn.ModuleList([ResidualConnection(Dropout) for _ in range(3)])
 
     def forward(self, x:torch.Tensor, Encoder_Output, Source_Mask, Target_Mask):
         """
@@ -323,13 +323,13 @@ class DecoderBlock(nn.Module):
         """
 
         # Calculate the Self Attention [First Part of the Decoder Block]
-        x = self.Residual_Connections[0](x, lambda x : self.Attention_Block(x, x, x, Target_Mask))
+        x = self.residual_connections[0](x, lambda x : self.attention_block(x, x, x, Target_Mask))
 
         # Calculate the Cross Attention
-        x = self.Residual_Connections[1](x, lambda x : self.Cross_Attention_Block(x, Encoder_Output, Encoder_Output, Source_Mask))
+        x = self.residual_connections[1](x, lambda x : self.cross_attention_block(x, Encoder_Output, Encoder_Output, Source_Mask))
         
         # Finally, we add the Feed Forward Block
-        x = self.Residual_Connections[2](x, self.Feed_Forward_Block)
+        x = self.residual_connections[2](x, self.feed_forward_block)
 
         # Return the Output / Final Value of the Decoder Block
         return x
@@ -343,8 +343,8 @@ class Decoder(nn.Module):
         := param: Layers - Layers of the Decoder (Has up to N Layers)
         """
         super().__init__()
-        self.Layers = Layers
-        self.Norm = LayerNormalization()
+        self.layers = Layers
+        self.norm = LayerNormalization()
 
     def forward(self, x, Encoder_Output, Source_Mask, Target_Mask):
         """
@@ -355,11 +355,11 @@ class Decoder(nn.Module):
         """
 
         # Iterate through each Layer
-        for Layer in self.Layers:
-            x = Layer(x, Encoder_Output, Source_Mask, Target_Mask)
+        for layer in self.layers:
+            x = layer(x, Encoder_Output, Source_Mask, Target_Mask)
         
         # Apply Layer Normalization and Return the Output
-        return self.Norm(x)
+        return self.norm(x)
 
 # Projection Layer [Called Linear Layer in the Diagram of the Paper]
 # -> Projects / Converts the Embedding [Ouput of the Decoder] into the Vocabulary 
@@ -372,16 +372,16 @@ class ProjectionLayer(nn.Module):
         := param: Vocabulary_Size
         """
         super().__init__()
-        self.Projection_Layer = nn.Linear(Dim_Model, Vocabulary_Size)
+        self.projection_layer = nn.Linear(Dim_Model, Vocabulary_Size)
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor):
         """
         := param: x
         """
 
         # Shape Conversion: (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Vocabulary_Size)
         # We also apply the log of softmax to maintain numerical stability and return the Value
-        return torch.log_softmax(self.Projection_Layer(x), dim = -1)
+        return torch.log_softmax(self.projection_layer(x), dim = -1)
 
 # Transformer
 # -> Processes the Input throughout the components of the system
@@ -400,13 +400,13 @@ class Transformer(nn.Module):
         super().__init__()
         
         # Saving the Components of the Transformer
-        self.Encoder = Encoder
-        self.Decoder = Decoder
-        self.Source_Embedding = Source_Embedding
-        self.Target_Embedding = Target_Embedding
-        self.Source_Position = Source_Position
-        self.Target_Position = Target_Position
-        self.Projection_Layer = Projection_Layer
+        self.encoder = Encoder
+        self.decoder = Decoder
+        self.source_embedding = Source_Embedding
+        self.target_embedding = Target_Embedding
+        self.source_position = Source_Position
+        self.target_position = Target_Position
+        self.projection_layer = Projection_Layer
 
     def encode(self, Source, Source_Mask):
         """
@@ -415,13 +415,13 @@ class Transformer(nn.Module):
         """
         
         # Apply the Embedding
-        Source = self.Source_Embedding(Source)
+        Source = self.source_embedding(Source)
 
         # Apply the Positional Encoding
-        Source = self.Source_Position(Source)
+        Source = self.source_position(Source)
 
         # Apply the Encoder
-        return self.Encoder(Source, Source_Mask)
+        return self.encoder(Source, Source_Mask)
 
     def decode(self, Encoder_Output:torch.Tensor, Source_Mask:torch.Tensor, Target, Target_Mask):
         """
@@ -432,13 +432,13 @@ class Transformer(nn.Module):
         """
 
         # Apply the Target Embedding to the Target Sentence
-        Target = self.Target_Embedding(Target)
+        Target = self.target_embedding(Target)
 
         # Apply the Positional Encoding to the Target Sentence
-        Target = self.Target_Position(Target)
+        Target = self.target_position(Target)
 
         # Apply the Decoder
-        return self.Decoder(Target, Encoder_Output, Source_Mask, Target_Mask)
+        return self.decoder(Target, Encoder_Output, Source_Mask, Target_Mask)
 
     def project(self, x:torch.Tensor):
         """
@@ -446,7 +446,7 @@ class Transformer(nn.Module):
         """
 
         # Simply apply the Projection (Goes from the Embedding to the Vocabulary Size)
-        return self.Projection_Layer(x)
+        return self.projection_layer(x)
 
 # Build_Transformer Function 
 # -> Merges all the previous Blocks, allowing to create a custom Transformer with given hyperparameters
