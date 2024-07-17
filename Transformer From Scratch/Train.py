@@ -37,7 +37,7 @@ def Get_All_Sentences(dataset, language):
     for item in dataset:
         yield item['translation'][language]
 
-def Get_or_Build_Tokenizer(config, dataset, language):
+def Get_or_Build_Tokenizer(config:dict, dataset, language):
     """
     := param: config - Configuration of the Tokenizer
     := param: dataset - Dataset used to Train the Transformer
@@ -63,7 +63,7 @@ def Get_or_Build_Tokenizer(config, dataset, language):
     # Return the Tokenizer
     return tokenizer
 
-def Get_Dataset(config):
+def Get_Dataset(config:dict):
     """
     := param: config - Configuration of the Model
     """
@@ -118,7 +118,7 @@ def Get_Model(config:dict, source_vocabulary_size, target_vocabulary_size):
     return model
 
 # Creating a Function to perform greedy decoding - used in the Validation Loop
-def Greedy_Decode(model:Transformer, source, source_mask, tokenizer_source:Tokenizer, tokenizer_target:Tokenizer, max_length:int, device):
+def Greedy_Decode(model:Transformer, source, source_mask, tokenizer_source:Tokenizer, tokenizer_target:Tokenizer, max_length:int, device:torch.device):
     """
     := param: model
     := param: source
@@ -165,7 +165,7 @@ def Greedy_Decode(model:Transformer, source, source_mask, tokenizer_source:Token
     return decoder_input.squeeze(0)
 
 # Create the Validation / Testing Loop
-def Run_Validation(model:Transformer, validation_dataset, tokenizer_source:Tokenizer, tokenizer_target:Tokenizer, max_length:int, device, print_message, global_step, writer:SummaryWriter, num_examples:int=2):
+def Run_Validation(model:Transformer, validation_dataset, tokenizer_source:Tokenizer, tokenizer_target:Tokenizer, max_length:int, device:torch.device, print_message, global_step, writer:SummaryWriter, num_examples:int=2):
     """
     := param: model
     := param: validation_dataset
