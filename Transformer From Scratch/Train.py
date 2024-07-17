@@ -164,10 +164,12 @@ def Train_Model(config:dict):
 
     # Create the Trainning Loop
     for epoch in range(initial_epoch, config['num_epochs']):
-        model.train()
+        # Define a Batch Iterator
         batch_iterator = tqdm(train_dataloader, desc=f'Processing epoch {epoch:02d}')
-
+        
         for batch in batch_iterator:
+            model.train()
+
             # Get the encoder / decoder inputs
             encoder_input = batch['encoder_input'].to(device) # Shape (batch size, sequence length)
             decoder_input = batch['decoder_input'].to(device) # Shape (batch size, sequence length)
@@ -211,6 +213,9 @@ def Train_Model(config:dict):
 
             # Increment the global step [Mostly used to track the Loss in Tensorboard]
             global_step += 1
+
+        # Run the Validation
+        Run_Validation(model, test_dataloader, tokenizer_source, tokenizer_target, config['sequence_length'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
 
         # Save the Model at the end of each epoch
         model_filename = Get_Weights_File_Path(config, f'{epoch:02d}')
