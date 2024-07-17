@@ -1,9 +1,10 @@
 import torch
 from torch import (nn)
 from torch.utils.data import (Dataset)
+from tokenizers import (Tokenizer)
 
 class BilingualDataset(Dataset):
-    def __init__(self, dataset, tokenizer_source, tokenizer_target, source_language, target_language, sequence_lengh) -> None:
+    def __init__(self, dataset, tokenizer_source:Tokenizer, tokenizer_target:Tokenizer, source_language, target_language, sequence_lengh) -> None:
         """
         := param: dataset - Dataset from HuggingFace
         := param: tokenizer_source
@@ -25,11 +26,11 @@ class BilingualDataset(Dataset):
         # Create the Necessary tokens to be later used
 
         # Start of Sentence Token
-        self.sos_token = torch.Tensor([tokenizer_source.token_to_id(['[SOS]'])], dtype=torch.int64)
+        self.sos_token = torch.tensor([tokenizer_target.token_to_id("[SOS]")], dtype=torch.int64)
         # End of Sentence Token
-        self.eos_token = torch.Tensor([tokenizer_source.token_to_id(['[EOS]'])], dtype=torch.int64)
+        self.eos_token = torch.tensor([tokenizer_target.token_to_id("[EOS]")], dtype=torch.int64)
         # Padding Token
-        self.padding_token = torch.Tensor([tokenizer_source.token_to_id(['[PAD]'])], dtype=torch.int64)
+        self.padding_token = torch.tensor([tokenizer_target.token_to_id("[PAD]")], dtype=torch.int64)
         
     def __len__(self):
         # Tells the length of the Dataset itself
