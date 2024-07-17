@@ -1,3 +1,6 @@
+# This Project focuses mainly on using a Tranformer in a Translation Task [English to Portuguese]
+# However, the Transformer can be used outside this spectrum
+
 import math
 import torch
 from torch import (nn)
@@ -509,8 +512,3 @@ def Build_Transformer(Source_Vocabulary_Size:int, Target_Vocabulary_Size:int, So
 
     # Return the Transformer
     return Transformer_
-
-if __name__ == "__main__":
-    # This Project focuses mainly on using a Tranformer in a Translation Task [English to Italian]
-    # However, the Transformer can be used outside this spectrum
-    print("HELLO THERE")
