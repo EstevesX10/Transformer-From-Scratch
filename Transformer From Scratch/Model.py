@@ -211,13 +211,14 @@ class MultiHeadAttentionBlock(nn.Module):
 # Residual Connection -> Connection that allows to Skip/Redirect the Output towards multiple Layers
 
 class ResidualConnection(nn.Module):
-    def __init__(self, Dropout:float) -> None:
+    def __init__(self, Features:int, Dropout:float) -> None:
         """
+        := param: Features
         := param: Dropout
         """
         super().__init__()
         self.Dropout = nn.Dropout(Dropout)
-        self.norm = LayerNormalization()
+        self.norm = LayerNormalization(Features)
 
     def forward(self, x:torch.Tensor, SubLayer):
         """
@@ -234,8 +235,9 @@ class ResidualConnection(nn.Module):
 # -> It also includes 2 steps of Addition and Normalization between the Outputs of each block and the Outputs from External Residual Connections
 
 class EncoderBlock(nn.Module):
-    def __init__(self, Self_Attention_Block:MultiHeadAttentionBlock, Feed_Forward_Block:FeedForwardBlock, Dropout:float) -> None:
+    def __init__(self, Features:int, Self_Attention_Block:MultiHeadAttentionBlock, Feed_Forward_Block:FeedForwardBlock, Dropout:float) -> None:
         """
+        := param: Features
         := param: Self_Attention_Block
         := param: Feed_Forwaard_Block
         := param: Dropout
@@ -247,7 +249,7 @@ class EncoderBlock(nn.Module):
         self.feed_forward_block = Feed_Forward_Block
         
         # Define the 2 Residual Connections
-        self.residual_connections = nn.ModuleList([ResidualConnection(Dropout) for _ in range(2)])
+        self.residual_connections = nn.ModuleList([ResidualConnection(Features, Dropout) for _ in range(2)])
 
     def forward(self, x:torch.Tensor, Source_Mask):
         """
@@ -268,13 +270,14 @@ class EncoderBlock(nn.Module):
 # -> The Encoder contains N Encoder Blocks. Therefore it takes into account each one when forwarding the input message throughut the entire system
 
 class Encoder(nn.Module):
-    def __init__(self, Layers:nn.ModuleList) -> None:
+    def __init__(self, Features:int, Layers:nn.ModuleList) -> None:
         """
+        := param: Features
         := param: Layers - Layers of the Encoder (Has up to N Layers)
         """
         super().__init__()
         self.layers = Layers
-        self.norm = LayerNormalization()
+        self.norm = LayerNormalization(Features)
 
     def forward(self, x:torch.Tensor, Mask):
         """
@@ -297,8 +300,9 @@ class Encoder(nn.Module):
 # -> It also contains 3 additional steps of addition and Normalization
 
 class DecoderBlock(nn.Module):
-    def __init__(self, Self_Attention_Block:MultiHeadAttentionBlock, Cross_Attention_Block:MultiHeadAttentionBlock, Feed_Forward_Block:FeedForwardBlock, Dropout:float) -> None:
+    def __init__(self, Features:int, Self_Attention_Block:MultiHeadAttentionBlock, Cross_Attention_Block:MultiHeadAttentionBlock, Feed_Forward_Block:FeedForwardBlock, Dropout:float) -> None:
         """
+        := param: Features
         := param: Self_Attention_Block
         := param: Cross_Attention_Block - Allows to merge the output of the Encoder (Key and Values) with the Query that comes from the previous layers of the decoder block
         := param: Feed_Forward_Block
@@ -312,7 +316,7 @@ class DecoderBlock(nn.Module):
         self.feed_forward_block = Feed_Forward_Block
 
         # Defining the Residual Connections (In this Case we have 3 of them)
-        self.residual_connections = nn.ModuleList([ResidualConnection(Dropout) for _ in range(3)])
+        self.residual_connections = nn.ModuleList([ResidualConnection(Features, Dropout) for _ in range(3)])
 
     def forward(self, x:torch.Tensor, Encoder_Output, Source_Mask, Target_Mask):
         """
@@ -338,13 +342,14 @@ class DecoderBlock(nn.Module):
 # -> The Decoder contains N Decoder Blocks. Therefore it takes into account each one when forwarding the input message throughut the entire system
 
 class Decoder(nn.Module):
-    def __init__(self, Layers:nn.ModuleList) -> None:
+    def __init__(self, Features:int, Layers:nn.ModuleList) -> None:
         """
+        := param: Features
         := param: Layers - Layers of the Decoder (Has up to N Layers)
         """
         super().__init__()
         self.layers = Layers
-        self.norm = LayerNormalization()
+        self.norm = LayerNormalization(Features)
 
     def forward(self, x, Encoder_Output, Source_Mask, Target_Mask):
         """
@@ -477,7 +482,7 @@ def Build_Transformer(Source_Vocabulary_Size:int, Target_Vocabulary_Size:int, So
     for _ in range(N):
         Encoder_Self_Attention_Block = MultiHeadAttentionBlock(Dim_Model, Num_Heads, Dropout)
         Feed_Forward_Block = FeedForwardBlock(Dim_Model, D_ff, Dropout)
-        Encoder_Block = EncoderBlock(Encoder_Self_Attention_Block, Feed_Forward_Block, Dropout)
+        Encoder_Block = EncoderBlock(Dim_Model, Encoder_Self_Attention_Block, Feed_Forward_Block, Dropout)
         Encoder_Blocks.append(Encoder_Block)
 
     # Create the Decoder Blocks
@@ -486,12 +491,12 @@ def Build_Transformer(Source_Vocabulary_Size:int, Target_Vocabulary_Size:int, So
         Decoder_Self_Attention_Block = MultiHeadAttentionBlock(Dim_Model, Num_Heads, Dropout)
         Decoder_Cross_Attention_Block = MultiHeadAttentionBlock(Dim_Model, Num_Heads, Dropout)
         Feed_Forward_Block = FeedForwardBlock(Dim_Model, D_ff, Dropout)
-        Decoder_Block = DecoderBlock(Decoder_Self_Attention_Block, Decoder_Cross_Attention_Block, Feed_Forward_Block, Dropout)
+        Decoder_Block = DecoderBlock(Dim_Model, Decoder_Self_Attention_Block, Decoder_Cross_Attention_Block, Feed_Forward_Block, Dropout)
         Decoder_Blocks.append(Decoder_Block)
 
     # Create the Encoder and Decoder
-    Encoder_ = Encoder(nn.ModuleList(Encoder_Blocks))
-    Decoder_ = Decoder(nn.ModuleList(Decoder_Blocks))
+    Encoder_ = Encoder(Dim_Model, nn.ModuleList(Encoder_Blocks))
+    Decoder_ = Decoder(Dim_Model, nn.ModuleList(Decoder_Blocks))
 
     # Create the Projection Layer
     Projection_Layer = ProjectionLayer(Dim_Model, Target_Vocabulary_Size)
