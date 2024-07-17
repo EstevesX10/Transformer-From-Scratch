@@ -10,10 +10,10 @@ def Get_Configuration():
         "source_language" : "en",
         "target_language" : "pt",
         "model_folder" : "Weights",
-        "model_basename" : "tmodel_",
+        "model_basename" : "tranformer_model_",
         "preload" : None,
         "tokenizer_file" : "tokenizer_{0}.json",
-        "experiment_name" : "Runs/tmodel"
+        "experiment_name" : "Runs/transformer_model"
     }
 
 def Get_Weights_File_Path(config:dict, epoch:str):
