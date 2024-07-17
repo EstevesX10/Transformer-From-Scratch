@@ -1,9 +1,9 @@
 from pathlib import (Path)
 
-def Get_Configuration():
+def Get_Configuration() -> dict:
     return {
         "batch_size" : 8,
-        "num_epochs" : 20,
+        "num_epochs" : 30,
         "lr" : 1e-4,
         "sequence_length" : 350,
         "dim_model" : 512,
@@ -16,7 +16,7 @@ def Get_Configuration():
         "experiment_name" : "Runs/transformer_model"
     }
 
-def Get_Weights_File_Path(config:dict, epoch:str):
+def Get_Weights_File_Path(config:dict, epoch:str) -> str:
     """
     := param: config
     := param: epoch
