@@ -115,7 +115,7 @@ class FeedForwardBlock(nn.Module):
         # Input Sentence - Tensor with shape (Batch, Sequence_Length, Dim_Model)
         # Convert it using linear_1 into another tensor of shape (Batch, Sequence_Length, Dim_FeedForward)
         # In the end, we convert it back using linear_2, obtaining the original shape (Batch, Sequence_Length, Dim_Model)
-        self.linear_2(self.dropout(torch.relu(self.linear_1(x))))
+        return self.linear_2(self.dropout(torch.relu(self.linear_1(x))))
 
 # Multi-Head Attention Block
 # -> Calculates the MultiHead Attention Output given a Query, a Key and Values
@@ -217,7 +217,7 @@ class ResidualConnection(nn.Module):
         := param: Dropout
         """
         super().__init__()
-        self.Dropout = nn.Dropout(Dropout)
+        self.dropout = nn.Dropout(Dropout)
         self.norm = LayerNormalization(Features)
 
     def forward(self, x:torch.Tensor, SubLayer):
@@ -225,10 +225,8 @@ class ResidualConnection(nn.Module):
         := param: x
         := param: SubLayer -> Previous Layer
         """
-        
-        print(SubLayer(self.norm(x)))
-        
-        return x + self.Dropout(SubLayer(self.norm(x)))
+    
+        return x + self.dropout(SubLayer(self.norm(x)))
 
 # Encoder Block
 # -> Contains two Main Blocks: MultiHead Attention Block and the FeedForward Block
