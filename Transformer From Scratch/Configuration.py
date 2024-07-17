@@ -13,7 +13,7 @@ def Get_Configuration():
         "model_basename" : "tmodel_",
         "preload" : None,
         "tokenizer_file" : "tokenizer_{0}.json",
-        "experiment_name" : "runs/tmodel"
+        "experiment_name" : "Runs/tmodel"
     }
 
 def Get_Weights_File_Path(config:dict, epoch:str):

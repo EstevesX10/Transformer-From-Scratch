@@ -50,8 +50,8 @@ def Get_or_Build_Tokenizer(config, dataset, language):
     if not Path.exists(tokenizer_path):
         # Creating and Defining the Tokenizer
         tokenizer = Tokenizer(WordLevel(unk_token='[UNK]')) # Specified what to attribute to unknown words
-        tokenizer.pre_tokenizer = Whitespace
-        tokenizer_trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[EOS]"], min_frequency=2) # Specified the Special Tokens and the Minimum of occurences a word need to have to appear in the Vocabulary
+        tokenizer.pre_tokenizer = Whitespace()
+        tokenizer_trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[SOS]", "[EOS]"], min_frequency=2) # Specified the Special Tokens and the Minimum of occurences a word need to have to appear in the Vocabulary
 
         # Train and Save the Tokenizer
         tokenizer.train_from_iterator(Get_All_Sentences(dataset, language), trainer=tokenizer_trainer)
