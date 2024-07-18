@@ -69,14 +69,15 @@ class PositionalEncoding(nn.Module):
 # -> Introduction of alpha (multiplication) and beta/bias (addition) parameters that introduce some fluctuations in the data since having all values in [0, 1] can be too restrictive
 
 class LayerNormalization(nn.Module):
-    def __init__(self, eps:float=1e-6) -> None:
+    def __init__(self, features:int, eps:float=1e-6) -> None:
         """
+        := param: features
         := param: eps - Error
         """
         super().__init__()
         self.eps = eps
-        self.alpha = nn.Parameter(torch.ones(1)) # Used in Multiplication
-        self.bias = nn.Parameter(torch.zeros(1)) # Used in Addition
+        self.alpha = nn.Parameter(torch.ones(features)) # Used in Multiplication
+        self.bias = nn.Parameter(torch.zeros(features)) # Used in Addition
 
     def forward(self, x:torch.Tensor):
         """
@@ -387,8 +388,10 @@ class ProjectionLayer(nn.Module):
 
         # Shape Conversion: (Batch_Size, Sequence_Length, Dim_Model) --> (Batch_Size, Sequence_Length, Vocabulary_Size)
         # We also apply the log of softmax to maintain numerical stability and return the Value
-        return torch.log_softmax(self.projection_layer(x), dim = -1)
 
+        # return torch.log_softmax(self.projection_layer(x), dim = -1)
+        return self.projection_layer(x)
+    
 # Transformer
 # -> Processes the Input throughout the components of the system
 
