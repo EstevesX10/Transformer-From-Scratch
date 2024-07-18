@@ -215,11 +215,12 @@ def Train_Model(config:dict):
         # Run the Validation
         Run_Validation(model, test_dataloader, tokenizer_source, tokenizer_target, config['sequence_length'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
 
-        # Save the Model at the end of each epoch
-        model_filename = Get_Weights_File_Path(config, f'{epoch:02d}')
-        torch.save({
-            'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'global_step': global_step
-        }, model_filename)
+        # Save the Model at the end of N saving steps / epochs
+        if ((epoch % config['saving_step']) == 0):
+            model_filename = Get_Weights_File_Path(config, f'{epoch:02d}')
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'global_step': global_step
+            }, model_filename)

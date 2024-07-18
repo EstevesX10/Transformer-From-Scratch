@@ -3,13 +3,14 @@ from pathlib import (Path)
 def Get_Configuration() -> dict:
     return {
         "batch_size" : 8,
-        "num_epochs" : 30,
+        "num_epochs" : 50,
+        "saving_step": 10,
         "lr" : 1e-4,
         "sequence_length" : 350,
         "dim_model" : 512,
         "source_language" : "en",
         "target_language" : "pt",
-        "model_folder" : "Weights",
+        "model_folder" : "PreTrained_Models",
         "model_basename" : "tranformer_model_",
         "preload" : None,
         "tokenizer_file" : "tokenizer_{0}.json",
