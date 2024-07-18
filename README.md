@@ -47,16 +47,16 @@ They are capable of:
 - Create Art, Music and even Stories
 - Being powerful virtual assistants for smarter interactions
 
+<div align="center">
 <img src="./Transformer From Scratch/Assets/Transformer.png" width="60%" height="60%" />
+</div>
 
 ## How Transformers Work
 
 Transformers break down text/sentences into smaller pieces called `tokens`. Therefore, through the use of attention mechanisms, they are capable of better understanding the relationships between these tokens. Consequently, in translation tasks, they manage to generate a translation (new text) by predicting one word at a time.
 
 <div align="center">
-
 <img src="./Transformer From Scratch/Assets/Translation_Task.png" width="60%" height="60%" />
-
 </div>
 
 ## Components of a Transformer
