@@ -117,7 +117,7 @@ def Get_Model(config:dict, source_vocabulary_size, target_vocabulary_size):
     return model
 
 # Train the Model (given the configuration)
-def Train_Model(config:dict):
+def Train_Model(config:dict, validate:bool=True):
     """
     := param: config
     """
@@ -212,8 +212,9 @@ def Train_Model(config:dict):
             # Increment the global step [Mostly used to track the Loss in Tensorboard]
             global_step += 1
 
-        # Run the Validation
-        Run_Validation(model, test_dataloader, tokenizer_source, tokenizer_target, config['sequence_length'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
+        if validate:
+            # Run the Validation
+            Run_Validation(model, test_dataloader, tokenizer_source, tokenizer_target, config['sequence_length'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
 
         # Save the Model at the end of N saving steps / epochs
         if ((epoch % config['saving_step']) == 0):
