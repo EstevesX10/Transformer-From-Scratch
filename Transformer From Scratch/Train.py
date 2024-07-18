@@ -25,7 +25,6 @@ from tokenizers.models import (WordLevel)
 from tokenizers.trainers import (WordLevelTrainer)
 from tokenizers.pre_tokenizers import (Whitespace)
 
-import warnings
 from pathlib import (Path)
 from tqdm import (tqdm)
 
@@ -224,8 +223,3 @@ def Train_Model(config:dict):
             'optimizer_state_dict': optimizer.state_dict(),
             'global_step': global_step
         }, model_filename)
-
-if __name__ == "__main__":
-    warnings.filterwarnings('ignore')
-    config = Get_Configuration()
-    Train_Model(config)
