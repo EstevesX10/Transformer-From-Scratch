@@ -14,10 +14,10 @@ from torch import (nn)
 from torch.utils.data import (Dataset, DataLoader, random_split)
 from torch.utils.tensorboard import (SummaryWriter)
 
-from Dataset import (BilingualDataset)
-from Configuration import (Get_Tokenizer_File_Path, Get_Weights_File_Path)
-from Model import (Transformer, Build_Transformer)
-from Validation import (Run_Validation)
+from .Dataset import (BilingualDataset)
+from .Configuration import (Get_Tokenizer_File_Path, Get_Weights_File_Path)
+from .Model import (Transformer, Build_Transformer)
+from .Validation import (Run_Validation)
 
 from datasets import (load_dataset)
 from tokenizers import (Tokenizer)
@@ -43,8 +43,11 @@ def Get_or_Build_Tokenizer(config:dict, dataset, language):
     := param: language - Language to which we are going to build the Tokenizer
     """
 
+    # Making Sure the Transformer Package Folder is created
+    Path(config['package_folder']).mkdir(parents=True, exist_ok=True)
+
     # Making sure the Tokenizers folder is created
-    Path(config['tokenizers_folder']).mkdir(parents=True, exist_ok=True)
+    Path(Path('.') / config['package_folder'] / config['tokenizers_folder']).mkdir(parents=True, exist_ok=True)
 
     # Path to Save the Tokenizer
     tokenizer_path = Get_Tokenizer_File_Path(config, language)
@@ -130,8 +133,11 @@ def Train_Model(config:dict, validate:bool=True):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
 
+    # Making Sure the Transformer Package Folder is created
+    Path(config['package_folder']).mkdir(parents=True, exist_ok=True)
+
     # Making sure the weights folder is created
-    Path(config['model_folder']).mkdir(parents=True, exist_ok=True)
+    Path(Path('.') / config['package_folder'] / config['model_folder']).mkdir(parents=True, exist_ok=True)
 
     # Load the Dataset
     train_dataloader, test_dataloader, tokenizer_source, tokenizer_target = Get_Dataset(config)

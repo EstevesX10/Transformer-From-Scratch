@@ -3,8 +3,8 @@ from torch.utils.tensorboard import (SummaryWriter)
 import torchmetrics
 
 from tokenizers import (Tokenizer)
-from Dataset import (causal_mask)
-from Model import (Transformer)
+from .Dataset import (causal_mask)
+from .Model import (Transformer)
 
 # Creating a Function to perform greedy decoding - used in the Validation Loop
 def Greedy_Decode(model:Transformer, source, source_mask, tokenizer_source:Tokenizer, tokenizer_target:Tokenizer, max_length:int, device:torch.device):

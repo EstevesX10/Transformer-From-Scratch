@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
-from Model import (Transformer)
-from Validation import (Greedy_Decode)
+from .Model import (Transformer)
+from .Validation import (Greedy_Decode)
 import altair as alt
 
 def Load_Next_Batch(config:dict, model:Transformer, test_dataloader, vocabulary_source, vocabulary_target, device):
