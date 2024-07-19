@@ -18,16 +18,16 @@
 <br/>
 
 <div align="center">
-    <a href="https://github.com/EstevesX10/REPO_NAME_HERE/blob/main/LICENSE">
-        <img src="https://img.shields.io/github/license/EstevesX10/REPO_NAME_HERE?style=flat&logo=gitbook&logoColor=white&label=License&color=white">
+    <a href="https://github.com/EstevesX10/Transformer-From-Scratch/blob/main/LICENSE">
+        <img src="https://img.shields.io/github/license/EstevesX10/Transformer-From-Scratch?style=flat&logo=gitbook&logoColor=white&label=License&color=white">
     </a>
     <a href="">
-        <img src="https://img.shields.io/github/repo-size/EstevesX10/REPO_NAME_HERE?style=flat&logo=googlecloudstorage&logoColor=white&logoSize=auto&label=Repository%20Size&color=white">
+        <img src="https://img.shields.io/github/repo-size/EstevesX10/Transformer-From-Scratch?style=flat&logo=googlecloudstorage&logoColor=white&logoSize=auto&label=Repository%20Size&color=white">
     </a>
     <a href="">
-        <img src="https://img.shields.io/github/stars/EstevesX10/REPO_NAME_HERE?style=flat&logo=adafruit&logoColor=white&logoSize=auto&label=Stars&color=white">
+        <img src="https://img.shields.io/github/stars/EstevesX10/Transformer-From-Scratch?style=flat&logo=adafruit&logoColor=white&logoSize=auto&label=Stars&color=white">
     </a>
-    <a href="https://github.com/EstevesX10/REPO_NAME_HERE/blob/main/DEPENDENCIES.md">
+    <a href="https://github.com/EstevesX10/Transformer-From-Scratch/blob/main/DEPENDENCIES.md">
         <img src="https://img.shields.io/badge/Dependencies-DEPENDENCIES.md-white?style=flat&logo=anaconda&logoColor=white&logoSize=auto&color=white"> 
     </a>
 </div>
