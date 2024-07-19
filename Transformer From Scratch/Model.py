@@ -313,7 +313,7 @@ class DecoderBlock(nn.Module):
         super().__init__()
 
         # Saving the Blocks
-        self.attention_block = Self_Attention_Block
+        self.self_attention_block = Self_Attention_Block
         self.cross_attention_block = Cross_Attention_Block
         self.feed_forward_block = Feed_Forward_Block
 
@@ -329,7 +329,7 @@ class DecoderBlock(nn.Module):
         """
 
         # Calculate the Self Attention [First Part of the Decoder Block]
-        x = self.residual_connections[0](x, lambda x : self.attention_block(x, x, x, Target_Mask))
+        x = self.residual_connections[0](x, lambda x : self.self_attention_block(x, x, x, Target_Mask))
 
         # Calculate the Cross Attention
         x = self.residual_connections[1](x, lambda x : self.cross_attention_block(x, Encoder_Output, Encoder_Output, Source_Mask))
