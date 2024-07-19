@@ -11,7 +11,7 @@ def Get_Configuration() -> dict:
         "source_language" : "en",
         "target_language" : "pt",
         "package_folder" : "Transformer",
-        "model_folder" : "PreTrained_Models",
+        "model_folder" : "Trained_Models",
         "model_basename" : "tranformer_model_",
         "preload" : None,
         "tokenizers_folder" : "Tokenizers",
