@@ -18,6 +18,20 @@ def Get_Configuration() -> dict:
         "experiment_name" : "Runs/transformer_model"
     }
 
+def Get_Tokenizer_File_Path(config:dict, language:str) -> str:
+    """
+    := param: config
+    := param: language
+    """
+
+    # Get the Tokenizers Folder
+    tokenizers_folder = config['tokenizers_folder']
+
+    # Get the Tokenizer Filename
+    tokenizer_filename = config['tokenizer_file'].format(language)
+
+    return (Path('.') / tokenizers_folder / tokenizer_filename)
+
 def Get_Weights_File_Path(config:dict, epoch:str) -> str:
     """
     := param: config

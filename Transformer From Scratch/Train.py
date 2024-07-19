@@ -15,7 +15,7 @@ from torch.utils.data import (Dataset, DataLoader, random_split)
 from torch.utils.tensorboard import (SummaryWriter)
 
 from Dataset import (BilingualDataset)
-from Configuration import (Get_Weights_File_Path, Get_Configuration)
+from Configuration import (Get_Tokenizer_File_Path, Get_Weights_File_Path)
 from Model import (Transformer, Build_Transformer)
 from Validation import (Run_Validation)
 
@@ -47,7 +47,7 @@ def Get_or_Build_Tokenizer(config:dict, dataset, language):
     Path(config['tokenizers_folder']).mkdir(parents=True, exist_ok=True)
 
     # Path to Save the Tokenizer
-    tokenizer_path = Path(config['tokenizers_folder'] + '/' + config['tokenizer_file'].format(language))
+    tokenizer_path = Get_Tokenizer_File_Path(config, language)
 
     # If the tokenizer does not exist, we create it
     if not Path.exists(tokenizer_path):
