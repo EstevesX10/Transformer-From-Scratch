@@ -146,7 +146,7 @@ def Train_Model(config:dict, validate:bool=True):
     model = Get_Model(config, tokenizer_source.get_vocab_size(), tokenizer_target.get_vocab_size()).to(device)
 
     # Start TensorBoard -> Allows to visualize the loss through graphics and charts
-    writer = SummaryWriter(config['experiment_name'])
+    writer = SummaryWriter(config['package_folder'] + '/' + config['experiment_name'])
 
     # Create the Optimizer (Used the Adam Optimizer)
     optimizer = torch.optim.Adam(model.parameters(), lr=config['lr'], eps=1e-9)
