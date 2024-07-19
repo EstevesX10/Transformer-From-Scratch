@@ -1,5 +1,5 @@
-import numpy as np
 import pandas as pd
+import torch
 from Model import (Transformer)
 from Validation import (Greedy_Decode)
 import altair as alt
@@ -24,8 +24,7 @@ def Load_Next_Batch(config:dict, model:Transformer, test_dataloader, vocabulary_
 
     return batch, encoder_input_tokens, decoder_input_tokens
 
-
-def mtx2df(m, max_row, max_col, row_tokens, col_tokens):
+def mtx2df(m:torch.Tensor, max_row:int, max_col:int, row_tokens:list, col_tokens:list) -> pd.DataFrame:
     return pd.DataFrame(
         [
             (
@@ -42,7 +41,7 @@ def mtx2df(m, max_row, max_col, row_tokens, col_tokens):
         columns=["row", "column", "value", "row_token", "col_token"],
     )
 
-def Get_Attention_Map(model:Transformer, attention_type:str, layer:int, head:int):
+def Get_Attention_Map(model:Transformer, attention_type:str, layer:int, head:int) -> torch.Tensor:
     if attention_type == "encoder":
         attention = model.encoder.layers[layer].self_attention_block.attention_scores
     elif attention_type == "decoder":
@@ -51,7 +50,7 @@ def Get_Attention_Map(model:Transformer, attention_type:str, layer:int, head:int
         attention = model.decoder.layers[layer].cross_attention_block.attention_scores
     return attention[0, head].data
 
-def Attention_Map(model:Transformer, attention_type, layer, head, row_tokens, col_tokens, max_sentence_length):
+def Attention_Map(model:Transformer, attention_type:str, layer:int, head:int, row_tokens:list, col_tokens:list, max_sentence_length:int) -> alt.Chart:
     df = mtx2df(
         Get_Attention_Map(model, attention_type, layer, head),
         max_sentence_length,
@@ -73,7 +72,7 @@ def Attention_Map(model:Transformer, attention_type, layer, head, row_tokens, co
         .interactive()
     )
 
-def Get_All_Attention_Maps(model:Transformer, attention_type:str, layers:list[int], heads:list[int], row_tokens:list, col_tokens, max_sentence_length:int):
+def Get_All_Attention_Maps(model:Transformer, attention_type:str, layers:list[int], heads:list[int], row_tokens:list, col_tokens:list, max_sentence_length:int) -> alt.vconcat:
     charts = []
     for layer in layers:
         rowCharts = []
