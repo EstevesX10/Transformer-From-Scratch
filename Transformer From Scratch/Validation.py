@@ -110,9 +110,9 @@ def Run_Validation(model:Transformer, validation_dataset, tokenizer_source:Token
 
             # Print it to the Console
             print_message('-'*console_width)
-            print_message(f'SOURCE: {source_text}')
-            print_message(f'TARGET: {target_text}')
-            print_message(f'PREDICTED: {predicted_text}')
+            print_message(f'[SOURCE]: {source_text}')
+            print_message(f'[TARGET]: {target_text}')
+            print_message(f'[PREDICTED]: {predicted_text}')
 
             if counter == num_examples:
                 break
