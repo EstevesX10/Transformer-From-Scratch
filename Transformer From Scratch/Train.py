@@ -42,8 +42,12 @@ def Get_or_Build_Tokenizer(config:dict, dataset, language):
     := param: dataset - Dataset used to Train the Transformer
     := param: language - Language to which we are going to build the Tokenizer
     """
+
+    # Making sure the Tokenizers folder is created
+    Path(config['tokenizers_folder']).mkdir(parents=True, exist_ok=True)
+
     # Path to Save the Tokenizer
-    tokenizer_path = Path(config['tokenizer_file'].format(language))
+    tokenizer_path = Path(config['tokenizers_folder'] + '/' + config['tokenizer_file'].format(language))
 
     # If the tokenizer does not exist, we create it
     if not Path.exists(tokenizer_path):
