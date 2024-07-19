@@ -13,6 +13,7 @@ def Get_Configuration() -> dict:
         "model_folder" : "PreTrained_Models",
         "model_basename" : "tranformer_model_",
         "preload" : None,
+        "tokenizers_folder" : "Tokenizers",
         "tokenizer_file" : "tokenizer_{0}.json",
         "experiment_name" : "Runs/transformer_model"
     }
