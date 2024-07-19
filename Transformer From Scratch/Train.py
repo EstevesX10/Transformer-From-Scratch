@@ -161,7 +161,7 @@ def Train_Model(config:dict, validate:bool=True):
     loss_funtion = nn.CrossEntropyLoss(ignore_index=tokenizer_source.token_to_id('[PAD]'), label_smoothing=0.1).to(device) # label smoothing allows to transfer a small percentage of the occurence with the highest probability and redistribute it through the other occurences / "ouputs"
 
     # Create the Trainning Loop
-    for epoch in range(initial_epoch, config['num_epochs']):
+    for epoch in range(initial_epoch, config['num_epochs'] + 1):
         # Define a Batch Iterator
         batch_iterator = tqdm(train_dataloader, desc=f'Processing epoch {epoch:02d}')
         
@@ -217,7 +217,7 @@ def Train_Model(config:dict, validate:bool=True):
             Run_Validation(model, test_dataloader, tokenizer_source, tokenizer_target, config['sequence_length'], device, lambda msg: batch_iterator.write(msg), global_step, writer)
 
         # Save the Model at the end of N saving steps / epochs
-        if (((epoch + 1) % config['saving_step']) == 0):
+        if ((epoch  % config['saving_step']) == 0):
             model_filename = Get_Weights_File_Path(config, f'{epoch:02d}')
             torch.save({
                 'epoch': epoch,
