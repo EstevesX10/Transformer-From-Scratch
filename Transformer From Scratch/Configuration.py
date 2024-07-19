@@ -3,7 +3,7 @@ from pathlib import (Path)
 def Get_Configuration() -> dict:
     return {
         "batch_size" : 8,
-        "num_epochs" : 50,
+        "num_epochs" : 100,
         "saving_step": 10,
         "lr" : 1e-4,
         "sequence_length" : 350,
