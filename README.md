@@ -39,6 +39,10 @@
 
 This project focuses on creating a `Transformer model` from the ground up using Python to perform `translation tasks` upon English sentences aiming to translate them into Portuguese. The Transformer model, discussed by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, and Illia Polosukhin in their 2017 paper **"Attention Is All You Need"** (In which this project was mainly based on),  has transformed the field of Natural Language Processing (NLP) with its **superior ability to manage long-range dependencies in sequential data** compared to traditional recurrent neural networks.
 
+<div align="center">
+<img src="./Transformer From Scratch/Assets/Transformer.png" width="60%" height="60%" />
+</div>
+
 ## What are Transformers?
 
 `Transformer Models` are a type of **deep learning model** designed to process sequences of data. Their innovative use of attention mechanisms, combined their efficiency has made them a cornerstone of **modern NLP applications**.
@@ -51,7 +55,7 @@ They are capable of:
 - Being powerful **virtual assistants** for smarter interactions
 
 <div align="center">
-<img src="./Transformer From Scratch/Assets/Transformer.png" width="60%" height="60%" />
+<img src="./Transformer From Scratch/Assets/Transformers_Types.png" width="60%" height="60%" />
 </div>
 
 ## How Transformers Work
