@@ -63,69 +63,70 @@ Transformers break down text/sentences into smaller pieces called `tokens`. Ther
 </div>
 
 ## Components of a Transformer
-
-<table width="100%">
-  <tr>
-    <td width="45%">
-        <div align="center">
-        <b>Embeddings</b>
-        </div>
-    </td>
-    <td width="55%">
-        <div align="center">
-        Convert words into numerical vectors
-        </div>
-    </td>
-  </tr>
-  <tr>
-    <td width="45%">
-        <div align="center">
-        <b>Attention Heads</b>
-        </div>
-    </td>
-    <td width="55%">
-        <div align="center">
-        Focus on different parts of the input
-        </div>
-    </td>
-  </tr>
-  <tr>
-    <td width="45%">
-        <div align="center">
-        <b>Encoder and Decoder</b>
-        </div>
-    </td>
-    <td width="55%">
-        <div align="center">
-        Process and generate text through Layers
-        </div>
-    </td>
-  </tr>
-  <tr>
-    <td width="45%">
-        <div align="center">
-        <b>Multi-Head Attention</b>
-        </div>
-    </td>
-    <td width="55%">
-        <div align="center">
-        Enhances the understanding of complex text
-        </div>
-    </td>
-  </tr>
-  <tr>
-    <td width="45%">
-        <div align="center">
-        <b>Feed-Forward Networks</b>
-        </div>
-    </td>
-    <td width="55%">
-        <div align="center">
-        Refines text Predictions
-        </div>
-    </td>
-  </tr>
-</table>
+<div align="center">
+    <table width="100%">
+    <tr>
+        <td width="45%">
+            <div align="center">
+            <b>Embeddings</b>
+            </div>
+        </td>
+        <td width="55%">
+            <div align="center">
+            Convert words into numerical vectors
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td width="45%">
+            <div align="center">
+            <b>Attention Heads</b>
+            </div>
+        </td>
+        <td width="55%">
+            <div align="center">
+            Focus on different parts of the input
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td width="45%">
+            <div align="center">
+            <b>Encoder and Decoder</b>
+            </div>
+        </td>
+        <td width="55%">
+            <div align="center">
+            Process and generate text through Layers
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td width="45%">
+            <div align="center">
+            <b>Multi-Head Attention</b>
+            </div>
+        </td>
+        <td width="55%">
+            <div align="center">
+            Enhances the understanding of complex text
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td width="45%">
+            <div align="center">
+            <b>Feed-Forward Networks</b>
+            </div>
+        </td>
+        <td width="55%">
+            <div align="center">
+            Refines text Predictions
+            </div>
+        </td>
+    </tr>
+    </table>
+</div>
 
 ## Technical Aspects
 
