@@ -140,6 +140,21 @@ Transformers commonly use:
 - **Active Learning**: Engage AI tp request human feedback on ambiguous cases, improving accuracy
 - **Automated Pipelines**: Use of continuous cleaning processes that adapt and learn over time
 
+## Project Development
+
+> ADD DESCRIPTION OF THE PROJECT DEVELOPMENT
+
+## Project Results / Demonstration
+
+For instance, a Transformer trained for 100 epochs was able to obtain the following results:
+
+        [SOURCE](English):    "The idea of having the sentence first!"
+
+      [TARGET](Portuguese):   "A idéia de ter uma sentença primeiro!"
+
+    [PREDICTED](Portuguese):  " A idéia de ter uma sentença primeiro !"
+
+
 <div align="right">
 <sub>
 <!-- <sup></sup> -->
