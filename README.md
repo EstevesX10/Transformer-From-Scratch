@@ -54,6 +54,8 @@ They are capable of:
 - Create **Art**, **Music** and even Stories
 - Being powerful **virtual assistants** for smarter interactions
 
+<br/>
+
 <div align="center">
 <img src="./Transformer From Scratch/Assets/Transformers_Types.png" width="60%" height="60%" />
 </div>
@@ -144,16 +146,15 @@ Transformers commonly use:
 
 > ADD DESCRIPTION OF THE PROJECT DEVELOPMENT
 
-## Project Results / Demonstration
+## Project Demonstration [Demo]
 
-For instance, a Transformer trained for 100 epochs was able to obtain the following results:
+For instance, a Transformer trained for **100 epochs** was able to obtain the following results:
 
-        [SOURCE](English):    "The idea of having the sentence first!"
+      [SOURCE](English):      "The idea of having the sentence first!"
 
-      [TARGET](Portuguese):   "A idéia de ter uma sentença primeiro!"
+     [TARGET](Portuguese):    "A idéia de ter uma sentença primeiro!"
 
     [PREDICTED](Portuguese):  " A idéia de ter uma sentença primeiro !"
-
 
 <div align="right">
 <sub>
