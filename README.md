@@ -37,7 +37,7 @@
 
 ## Project Overview
 
-> ADD PROJECT OVERVIEW
+This project focuses on creating a `Transformer model` from the ground up using Python to perform `translation tasks` upon English sentences aiming to translate them into Portuguese. The Transformer model, discussed by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, and Illia Polosukhin in their 2017 paper **"Attention Is All You Need"** (In which the project was mainly based on),  has transformed the field of Natural Language Processing (NLP) with its **superior ability to manage long-range dependencies in sequential data** compared to traditional recurrent neural networks.
 
 ## What are Transformers?
 
