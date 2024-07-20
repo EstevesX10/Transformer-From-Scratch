@@ -41,14 +41,14 @@
 
 ## What are Transformers?
 
-Transformer Models are a type of deep learning model designed to process sequences of data. Their innovative use of attention mechanisms, combined their efficiency has made them a cornerstone of modern NLP applications.
+`Transformer Models` are a type of **deep learning model** designed to process sequences of data. Their innovative use of attention mechanisms, combined their efficiency has made them a cornerstone of **modern NLP applications**.
 
 They are capable of:
 
-- Understanding context better than previous models
-- Perform Translation Tasks allowing for a easier global communication
-- Create Art, Music and even Stories
-- Being powerful virtual assistants for smarter interactions
+- **Better understanding context** than previous models
+- Perform **Translation Tasks** allowing for a easier global communication
+- Create **Art**, **Music** and even Stories
+- Being powerful **virtual assistants** for smarter interactions
 
 <div align="center">
 <img src="./Transformer From Scratch/Assets/Transformer.png" width="60%" height="60%" />
@@ -56,7 +56,7 @@ They are capable of:
 
 ## How Transformers Work
 
-Transformers break down text/sentences into smaller pieces called `tokens`. Therefore, through the use of attention mechanisms, they are capable of better understanding the relationships between these tokens. Consequently, in translation tasks, they manage to generate a translation (new text) by predicting one word at a time.
+Transformers **break down text/sentences** into smaller pieces called `tokens`. Therefore, through the use of `attention mechanisms`, they are capable of better understanding the relationships between these tokens. Consequently, in **translation tasks**, they manage to generate a translation (new text) by predicting one word at a time.
 
 <div align="center">
 <img src="./Transformer From Scratch/Assets/Translation_Task.png" width="60%" height="60%" />
