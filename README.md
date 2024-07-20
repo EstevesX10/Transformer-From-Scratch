@@ -145,7 +145,7 @@ Transformers commonly use:
 
 ## Transformer Demo
 
-For instance, a Transformer trained for **100 epochs** was able to obtain the following results:
+For instance, a Transformer trained for **100 epochs** was able to obtain the following translation results:
 
       [SOURCE](English):      "The idea of having the sentence first!"
 
