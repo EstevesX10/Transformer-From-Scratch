@@ -69,6 +69,7 @@ Transformers **break down text/sentences** into smaller pieces called `tokens`. 
 </div>
 
 ## Components of a Transformer
+
 <div align="center">
     <table width="100%">
     <tr>
@@ -142,11 +143,7 @@ Transformers commonly use:
 - **Active Learning**: Engage AI tp request human feedback on ambiguous cases, improving accuracy
 - **Automated Pipelines**: Use of continuous cleaning processes that adapt and learn over time
 
-## Project Development
-
-> ADD DESCRIPTION OF THE PROJECT DEVELOPMENT
-
-## Project Demonstration [Demo]
+## Transformer Demo
 
 For instance, a Transformer trained for **100 epochs** was able to obtain the following results:
 
